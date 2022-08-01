@@ -19,16 +19,16 @@ implements IRepository<TDomainEntity> {
   }
 
   async findAll(): Promise<TDomainEntity[]> {
-    const query = this.collectionInstance.query('SELECT * FROM product');
-    const dbResult = await this.collectionInstance.execute(query);
-    this.dataMapper.toDomain(dbResult);
-    return [];
+    const query = `SELECT * FROM product`;
+    const [dbResult,] = await this.collectionInstance.promise().query(query);
+    console.log(dbResult);
+    return (dbResult as any).map((result: any) => this.dataMapper.toDomain(result));
   }
 
   async findOneById(guid: string): Promise<TDomainEntity | null> {
-    const query = this.collectionInstance.query('SELECT * FROM product WHERE guid = ' + guid);
-    const dbResult = await this.collectionInstance.execute(query);
-    return this.dataMapper.toDomain(dbResult);
+    const query = `SELECT * FROM product WHERE guid = '${guid}'`;
+    const [dbResult,] = await this.collectionInstance.promise().query(query);
+    return this.dataMapper.toDomain((dbResult as any)[0]);
   }
 
   async findUser(username: string): Promise<TDomainEntity | null> {
