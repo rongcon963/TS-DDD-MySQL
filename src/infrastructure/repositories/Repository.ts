@@ -1,6 +1,5 @@
 import { IRepository } from '../../core/IRepository';
 import { unmanaged, injectable } from 'inversify';
-import { createMysqlConnection, Query } from './../db/mysql';
 import {Connection} from "mysql2";
 import { IDataMapper } from '../../core/IDataMapper';
 
@@ -21,7 +20,6 @@ implements IRepository<TDomainEntity> {
   async findAll(): Promise<TDomainEntity[]> {
     const query = `SELECT * FROM product`;
     const [dbResult,] = await this.collectionInstance.promise().query(query);
-    console.log(dbResult);
     return (dbResult as any).map((result: any) => this.dataMapper.toDomain(result));
   }
 
@@ -36,38 +34,30 @@ implements IRepository<TDomainEntity> {
   }
 
   async doesExists(guid: string): Promise<boolean> {
-    let query = `SELECT * FROM product WHERE guid = '${guid}' limit 1`;
-    let check = this.collectionInstance.query(query);
-    if (check) {
-      return true;
-    }
-    return false;
+    const query = `SELECT * FROM product WHERE guid = '${guid}' limit 1`;
+    const [check,] = await this.collectionInstance.promise().query(query);
+
+    return !!(check as any)[0];
   }
 
   async save(entity: TDomainEntity): Promise<void> {
     const guid = (entity as any).guid;
     const exists = await this.doesExists(guid);
     
+    if(!exists) {
       let query = `INSERT INTO product (guid,name,description,instock_quantity,price) VALUES (?,?,?,?,?)`;
-      // createMysqlConnection('localhost')
-      //   .then((connection) => {
-      //     Query(connection,query)
-          
-      //     .then ((result) => {
-      //       return result;
-      //     })
-      //   })
-      //let {name,description,instock_quantity,price} = this.dataMapper.toDalEntity(entity);
+      
       const propertyNames = Object.values(this.dataMapper.toDalEntity(entity));
       await this.collectionInstance.promise().query(query, propertyNames);
       return;
-    
-    // let update = `UPDATE product SET ? WHERE guid = ? `;
-    // const propertyNames = Object.values(this.dataMapper.toDalEntity(entity));
-    // await this.collectionInstance.query(update, [{propertyNames},{guid}]);
+    }
+    let query = `UPDATE product SET guid=?,name=?,description=?,instock_quantity=?,price=? WHERE guid= '${guid}' `;
+    const propertyNames = Object.values(this.dataMapper.toDalEntity(entity));
+    await this.collectionInstance.promise().query(query, propertyNames);
   }
 
   async delete(id: string): Promise<void> {
-    
+    const query = `DELETE FROM product WHERE guid= '${id}' `;
+    await this.collectionInstance.promise().query(query);
   }
 }

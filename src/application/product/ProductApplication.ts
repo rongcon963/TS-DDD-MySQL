@@ -25,12 +25,11 @@ export class ProductApplication {
 
     async createProduct({ name, description, instockQuantity, price }: any): Promise<void> {
         const product = Product.create({ name, description, instockQuantity, price });
-        console.log(product);
         
         await this.productRepository.save(product);
     }
 
-    async updateUserById(id: string,{ name, description, instockQuantity, price }: any ): Promise<void> {
+    async updateProductById(id: string,{ name, description, instockQuantity, price }: any ): Promise<void> {
         const product = await this.productRepository.findOneById(id);
         if (!product) throw 'Product not found';
         
@@ -40,7 +39,7 @@ export class ProductApplication {
         await this.productRepository.save(product);
     }
 
-    async deleteUserById(id: string): Promise<void> {
+    async deleteProductById(id: string): Promise<void> {
         await this.productRepository.delete(id);
     }
 }

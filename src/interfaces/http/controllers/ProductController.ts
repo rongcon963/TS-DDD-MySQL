@@ -22,16 +22,30 @@ export class ProductController {
 
     @httpGet('/')
     async getAllProducts(@request() req: Request, @response() res: Response) {
-        const books = await this.service.getAllProducts();
-        return res.json(ok(books, 'Successfully retrieved all users'));
+        const products = await this.service.getAllProducts();
+        return res.json(ok(products, 'Successfully retrieved all products'));
     }
 
     @httpGet('/:id')
     async getProductById(@request() req: Request, @response() res: Response) {
-        const user = await this.service.getProductById(req.params.id);
-        return res.json(ok(user, `Successfully retrieved a user with an ID of ${req.params.id}`));
+        const product = await this.service.getProductById(req.params.id);
+        return res.json(ok(product, `Successfully retrieved a product with an ID of ${req.params.id}`));
     }
 
+    @httpPut('/:id')
+    async UpdateProduct(@request() req: Request, @response() res: Response) {
+        const { body } = req;
+        const product = await this.service.updateProductById(req.params.id, body);
+        return res.json(ok(product, `Successfully retrieved a product with an ID of ${req.params.id}`));
+    }
+
+    @httpDelete('/:id')
+    async deleteProductById(@request() req: Request, @response() res: Response) {
+        const product = await this.service.deleteProductById(req.params.id);
+
+        return res.json(ok(product, `Successfully delete a product with an ID of ${req.params.id}`));
+    }
+    
     @httpPost('/')
     async createProduct(@request() req: Request, @response() res: Response) {
         const { body } = req;
@@ -42,4 +56,5 @@ export class ProductController {
         message: 'Success'
         });
     }
+
 }
